@@ -1,0 +1,2 @@
+1- dotnet ef migrations add InitialMigration --project ../DataAccess/
+2- dotnet ef database update --project ../DataAccess/
