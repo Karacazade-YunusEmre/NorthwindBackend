@@ -119,11 +119,11 @@ public class CategoriesController : ControllerBase
 
     [HttpDelete]
     [Route("DeleteCategory")]
-    public IActionResult DeleteCategory(Category category)
+    public IActionResult DeleteCategory(int id)
     {
         try
         {
-            _category.Delete(category);
+            _category.Delete(id);
 
             return new StatusCodeResult(201);
         }

@@ -80,7 +80,7 @@ public class ProductsController : ControllerBase
 
         return BadRequest();
     }
-    
+
     [HttpPost]
     [Route("AddProduct")]
     public IActionResult AddProduct(Product product)
@@ -98,7 +98,7 @@ public class ProductsController : ControllerBase
 
         return BadRequest();
     }
-    
+
     [HttpPut]
     [Route("UpdateProduct")]
     public IActionResult UpdateProduct(Product product)
@@ -116,14 +116,14 @@ public class ProductsController : ControllerBase
 
         return BadRequest();
     }
-    
+
     [HttpDelete]
     [Route("DeleteProduct")]
-    public IActionResult DeleteProduct(Product product)
+    public IActionResult DeleteProduct(int id)
     {
         try
         {
-            _product.Delete(product);
+            _product.Delete(id);
 
             return new StatusCodeResult(201);
         }

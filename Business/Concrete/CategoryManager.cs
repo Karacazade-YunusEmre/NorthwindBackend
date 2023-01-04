@@ -38,8 +38,11 @@ public class CategoryManager : ICategoryManager
         _repository.Update(entity);
     }
 
-    public void Delete(Category entity)
+    public void Delete(int id)
     {
-        _repository.Delete(entity);
+        _repository.Delete(new Category()
+        {
+            Id = id,
+        });
     }
 }

@@ -38,8 +38,11 @@ public class ProductManager : IProductManager
         _repository.Update(entity);
     }
 
-    public void Delete(Product entity)
+    public void Delete(int id)
     {
-        _repository.Delete(entity);
+        _repository.Delete(new Product()
+        {
+            Id = id,
+        });
     }
 }

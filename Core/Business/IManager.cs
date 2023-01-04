@@ -9,5 +9,5 @@ public interface IManager<TEntity> where TEntity : class, IEntity, new()
     public TEntity? GetById(int id);
     public void Add(TEntity entity);
     public void Update(TEntity entity);
-    public void Delete(TEntity entity);
+    public void Delete(int id);
 }
