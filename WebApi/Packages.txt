@@ -1,3 +1,6 @@
-1- Microsoft.AspNetCore.Identity.EntityFrameworkCore
-2- Microsoft.EntityFrameworkCore.Tools
-3- Microsoft.EntityFrameworkCore.Sqlite
+1- Autofac
+2- Autofac.Extensions.DependencyInjection
+3- Microsoft.AspNetCore.Identity.EntityFrameworkCore
+4- Microsoft.EntityFrameworkCore
+5- Microsoft.EntityFrameworkCore.Sqlite
+6- Microsoft.EntityFrameworkCore.Tools

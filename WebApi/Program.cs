@@ -1,7 +1,6 @@
-using Business.Abstract;
-using Business.Concrete;
-using DataAccess.Abstract;
-using DataAccess.Concrete.EntityFramework;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Business.DependencyResolvers.Autofac;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,11 +11,19 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// DependencyInjection
-builder.Services.AddScoped<IProductRepository, EfProductRepository>();
-builder.Services.AddScoped<ICategoryRepository, EfCategoryRepository>();
-builder.Services.AddScoped<IProductManager, ProductManager>();
-builder.Services.AddScoped<ICategoryManager, CategoryManager>();
+// DependencyInjection Default Style
+// builder.Services.AddScoped<IProductRepository, EfProductRepository>();
+// builder.Services.AddScoped<ICategoryRepository, EfCategoryRepository>();
+// builder.Services.AddScoped<IProductService, ProductManager>();
+// builder.Services.AddScoped<ICategoryService, CategoryManager>();
+
+
+// DependencyInjection Autofac Style
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
+    .ConfigureContainer<ContainerBuilder>(containerBuilder =>
+    {
+        containerBuilder.RegisterModule(new AutofacBusinessModule());
+    });
 
 
 var app = builder.Build();
@@ -31,6 +38,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
 
 app.MapControllers();
 

@@ -3,6 +3,6 @@ using Entities.Concrete;
 
 namespace Business.Abstract;
 
-public interface IProductManager : IManager<Product>
+public interface ICategoryService : IService<Category>
 {
 }

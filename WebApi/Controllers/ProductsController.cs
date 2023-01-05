@@ -8,21 +8,21 @@ namespace WebApi.Controllers;
 [Route("[controller]")]
 public class ProductsController : ControllerBase
 {
-    private readonly IProductManager _product;
+    private readonly IProductService _product;
 
-    public ProductsController(IProductManager product)
+    public ProductsController(IProductService product)
     {
         _product = product;
     }
 
     [HttpGet]
-    [Route("GetAllProduct")]
+    [Route("getallproduct")]
     public IActionResult GetAllProduct()
     {
         try
         {
             var result = _product.GetAll();
-            if (result.Count == 0)
+            if (!result.Success)
             {
                 return NotFound("There is no any Product item");
             }
@@ -38,13 +38,13 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    [Route("GetProductsByName")]
+    [Route("getproductbyname")]
     public IActionResult GetProductsByName(string name)
     {
         try
         {
             var result = _product.GetByName(name);
-            if (result.Count == 0)
+            if (!result.Success)
             {
                 return NotFound($"There is no any Product item with name contain: {name}");
             }
@@ -60,13 +60,13 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    [Route("GetProductById")]
+    [Route("getproductbyid")]
     public IActionResult GetProductById(int id)
     {
         try
         {
             var result = _product.GetById(id);
-            if (result == null)
+            if (!result.Success)
             {
                 return NotFound($"There is no any Product item with id: {id}");
             }
@@ -82,12 +82,16 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
-    [Route("AddProduct")]
+    [Route("add")]
     public IActionResult AddProduct(Product product)
     {
         try
         {
-            _product.Add(product);
+            var result = _product.Add(product);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
 
             return new StatusCodeResult(201);
         }
@@ -100,12 +104,16 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPut]
-    [Route("UpdateProduct")]
+    [Route("update")]
     public IActionResult UpdateProduct(Product product)
     {
         try
         {
-            _product.Update(product);
+            var result = _product.Update(product);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
 
             return new StatusCodeResult(201);
         }
@@ -118,12 +126,16 @@ public class ProductsController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("DeleteProduct")]
+    [Route("delete")]
     public IActionResult DeleteProduct(int id)
     {
         try
         {
-            _product.Delete(id);
+            var result = _product.Delete(id);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
 
             return new StatusCodeResult(201);
         }

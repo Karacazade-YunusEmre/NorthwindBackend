@@ -1,10 +1,12 @@
 using Business.Abstract;
+using Core.Utilities.Results.Abstract;
+using Core.Utilities.Results.Concrete;
 using DataAccess.Abstract;
 using Entities.Concrete;
 
 namespace Business.Concrete;
 
-public class CategoryManager : ICategoryManager
+public class CategoryManager : ICategoryService
 {
     private readonly ICategoryRepository _repository;
 
@@ -13,36 +15,34 @@ public class CategoryManager : ICategoryManager
         _repository = repository;
     }
 
-    public List<Category> GetAll()
+    public IDataResult<List<Category>> GetAll()
     {
-        return _repository.GetAll();
+        return new SuccessDataResult<List<Category>>(_repository.GetAll());
     }
 
-    public List<Category> GetByName(string name)
+    public IDataResult<List<Category>> GetByName(string name)
     {
-        return _repository.GetAll(c => c.Name.ToLower().Contains(name.ToLower()));
+        return new SuccessDataResult<List<Category>>(_repository.GetAll(c =>
+            c.Name.ToLower().Contains(name.ToLower())));
     }
 
-    public Category? GetById(int id)
+    public IDataResult<Category?> GetById(int id)
     {
-        return _repository.Get(c => c.Id == id);
+        return new SuccessDataResult<Category?>(_repository.Get(c => c.Id == id));
     }
 
-    public void Add(Category entity)
+    public IResult Add(Category entity)
     {
-        _repository.Add(entity);
+        return new SuccessResult("Ürün başarıyla eklendi");
     }
 
-    public void Update(Category entity)
+    public IResult Update(Category entity)
     {
-        _repository.Update(entity);
+        return new SuccessResult("Ürün başarıyla güncellendi");
     }
 
-    public void Delete(int id)
+    public IResult Delete(int id)
     {
-        _repository.Delete(new Category()
-        {
-            Id = id,
-        });
+        return new SuccessResult("Ürün başarıyla silindi");
     }
 }

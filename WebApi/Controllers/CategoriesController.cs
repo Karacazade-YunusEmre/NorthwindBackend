@@ -8,21 +8,21 @@ namespace WebApi.Controllers;
 [Route("[controller]")]
 public class CategoriesController : ControllerBase
 {
-    private readonly ICategoryManager _category;
+    private readonly ICategoryService _category;
 
-    public CategoriesController(ICategoryManager category)
+    public CategoriesController(ICategoryService category)
     {
         _category = category;
     }
 
     [HttpGet]
-    [Route("GetAllCategories")]
-    public IActionResult GetAllCategories()
+    [Route("getallcategory")]
+    public IActionResult GetAllCategory()
     {
         try
         {
             var result = _category.GetAll();
-            if (result.Count == 0)
+            if (!result.Success)
             {
                 return NotFound("There is no any Category item");
             }
@@ -38,13 +38,13 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
-    [Route("GetCategoriesByName")]
-    public IActionResult GetCategoriesByName(string name)
+    [Route("getcategorybyname")]
+    public IActionResult GetCategoryByName(string name)
     {
         try
         {
             var result = _category.GetByName(name);
-            if (result.Count == 0)
+            if (!result.Success)
             {
                 return NotFound($"There is no any Category item with name contain: {name}");
             }
@@ -60,13 +60,13 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
-    [Route("GetCategoryById")]
+    [Route("getcategorybyid")]
     public IActionResult GetCategoryById(int id)
     {
         try
         {
             var result = _category.GetById(id);
-            if (result == null)
+            if (!result.Success)
             {
                 return NotFound($"There is no any Category item with id: {id}");
             }
@@ -82,12 +82,16 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPost]
-    [Route("AddCategory")]
+    [Route("add")]
     public IActionResult AddCategory(Category category)
     {
         try
         {
-            _category.Add(category);
+            var result = _category.Add(category);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
 
             return new StatusCodeResult(201);
         }
@@ -100,12 +104,16 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPut]
-    [Route("UpdateCategory")]
+    [Route("update")]
     public IActionResult UpdateCategory(Category category)
     {
         try
         {
-            _category.Update(category);
+            var result = _category.Update(category);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
 
             return new StatusCodeResult(201);
         }
@@ -118,12 +126,16 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("DeleteCategory")]
+    [Route("delete")]
     public IActionResult DeleteCategory(int id)
     {
         try
         {
-            _category.Delete(id);
+            var result = _category.Delete(id);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
 
             return new StatusCodeResult(201);
         }

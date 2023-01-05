@@ -1,10 +1,13 @@
 using Business.Abstract;
+using Business.Constants;
+using Core.Utilities.Results.Abstract;
+using Core.Utilities.Results.Concrete;
 using DataAccess.Abstract;
 using Entities.Concrete;
 
 namespace Business.Concrete;
 
-public class ProductManager : IProductManager
+public class ProductManager : IProductService
 {
     private readonly IProductRepository _repository;
 
@@ -13,36 +16,38 @@ public class ProductManager : IProductManager
         _repository = repository;
     }
 
-    public List<Product> GetAll()
+    public IDataResult<List<Product>> GetAll()
     {
-        return _repository.GetAll();
+        return new SuccessDataResult<List<Product>>(_repository.GetAll());
     }
 
-    public List<Product> GetByName(string name)
+    public IDataResult<List<Product>> GetByName(string name)
     {
-        return _repository.GetAll(p => p.Name.ToLower().Contains(name.ToLower()));
+        return new SuccessDataResult<List<Product>>(_repository.GetAll(p => p.Name.ToLower().Contains(name.ToLower())));
     }
 
-    public Product? GetById(int id)
+    public IDataResult<Product?> GetById(int id)
     {
-        return _repository.Get(p => p.Id == id);
+        return new SuccessDataResult<Product?>(_repository.Get(p => p.Id == id));
     }
 
-    public void Add(Product entity)
+    public IDataResult<List<Product>> GetProductsByCategoryId(int id)
     {
-        _repository.Add(entity);
+        return new SuccessDataResult<List<Product>>(_repository.GetAll(p => p.CategoryId == id).ToList());
     }
 
-    public void Update(Product entity)
+    public IResult Add(Product entity)
     {
-        _repository.Update(entity);
+        return new SuccessResult(Messages.ProductAdded);
     }
 
-    public void Delete(int id)
+    public IResult Update(Product entity)
     {
-        _repository.Delete(new Product()
-        {
-            Id = id,
-        });
+        return new SuccessResult(Messages.ProductUpdated);
+    }
+
+    public IResult Delete(int id)
+    {
+        return new SuccessResult(Messages.ProductDeleted);
     }
 }
