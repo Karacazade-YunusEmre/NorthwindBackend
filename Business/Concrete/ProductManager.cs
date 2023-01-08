@@ -18,7 +18,14 @@ public class ProductManager : IProductService
 
     public IDataResult<List<Product>> GetAll()
     {
-        return new SuccessDataResult<List<Product>>(_repository.GetAll());
+        try
+        {
+            return new SuccessDataResult<List<Product>>(_repository.GetAll());
+        }
+        catch (Exception exception)
+        {
+            return new ErrorDataResult<List<Product>>(data: new List<Product>(), message: exception.Message);
+        }
     }
 
     public IDataResult<List<Product>> GetByName(string name)
