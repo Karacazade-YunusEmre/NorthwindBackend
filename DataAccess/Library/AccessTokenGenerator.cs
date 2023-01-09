@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using DataAccess.Concrete.EntityFramework.Contexts;
-using Entities.Concrete;
 using Entities.Concrete.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -37,83 +36,51 @@ public class AccessTokenGenerator
     /// <returns></returns>
     public UserToken GetToken()
     {
-        UserToken userTokens;
-        TokenInfo tokenInfo;
+        UserToken userToken;
+        UserToken newToken;
 
         // Kullanıcıya ait token var mı kontrol edilir.
         if (Context.ApplicationUserToken.Any(x => x.UserId == User.Id))
         {
             // İlgili token bilgileri bulunur.
-            userTokens = Context.ApplicationUserToken.SingleOrDefault(x => x.UserId == User.Id)!;
+            userToken = Context.ApplicationUserToken.SingleOrDefault(x => x.UserId == User.Id)!;
 
             // Expire olmuş ise yeni token oluşturup günceller.
-            if (userTokens.ExpireDate <= DateTime.Now)
+            if (userToken.ExpireDate <= DateTime.Now)
             {
-                // Create new token
-                tokenInfo = GenerateToken();
+                userToken = GenerateToken();
 
-                userTokens.ExpireDate = tokenInfo.ExpireDate;
-                userTokens.Value = tokenInfo.Token;
-
-                Context.ApplicationUserToken.Update(userTokens);
+                Context.ApplicationUserToken.Update(userToken);
             }
         }
         else
         {
             // Create new token
-            tokenInfo = GenerateToken();
+            newToken = GenerateToken();
 
-            userTokens = new UserToken
+            userToken = new UserToken
             {
                 UserId = User.Id,
                 LoginProvider = "SystemAPI",
                 Name = User.FirstName + User.LastName,
 
-                ExpireDate = tokenInfo.ExpireDate,
-                Value = tokenInfo.Token
+                ExpireDate = newToken.ExpireDate,
+                Value = newToken.Value,
             };
 
-            Context.ApplicationUserToken.Add(userTokens);
+            Context.ApplicationUserToken.Add(userToken);
         }
 
         Context.SaveChangesAsync();
 
-        return userTokens;
-    }
-
-    /// <summary>
-    /// Kullanıcıya ait tokenı siler.
-    /// </summary>
-    /// <returns></returns>
-    public async Task<bool> DeleteToken()
-    {
-        var returnResult = true;
-
-        try
-        {
-            // Kullanıcıya ait önceden oluşturulmuş bir token var mı kontrol edilir.
-            if (Context.ApplicationUserToken.Any(x => x.UserId == User.Id))
-            {
-                var userTokens = Context.ApplicationUserToken.FirstOrDefault(x => x.UserId == User.Id);
-
-                if (userTokens != null) Context.ApplicationUserToken.Remove(userTokens);
-            }
-
-            await Context.SaveChangesAsync();
-        }
-        catch (Exception)
-        {
-            returnResult = false;
-        }
-
-        return returnResult;
+        return userToken;
     }
 
     /// <summary>
     /// Yeni token oluşturur.
     /// </summary>
     /// <returns></returns>
-    private TokenInfo GenerateToken()
+    private UserToken GenerateToken()
     {
         var expireDate = DateTime.Now.AddMinutes(15);
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -130,7 +97,7 @@ public class AccessTokenGenerator
                 // Id üzerinden, aktif kullanıcıyı buluyor olacağız.
 
                 new Claim(ClaimTypes.NameIdentifier, User.Id),
-                new Claim(ClaimTypes.Name, User.FirstName + User.LastName),
+                new Claim(ClaimTypes.Name, User.FirstName + " " + User.LastName),
                 new Claim(ClaimTypes.Email, User.Email)
             }),
 
@@ -144,13 +111,41 @@ public class AccessTokenGenerator
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
-
-        var tokenInfo = new TokenInfo
+        
+        var newUserToken = new UserToken()
         {
-            Token = tokenString,
-            ExpireDate = expireDate
+            Value = tokenString,
+            ExpireDate = expireDate,
         };
 
-        return tokenInfo;
+        return newUserToken;
+    }
+
+    /// <summary>
+    /// Kullanıcıya ait tokenı siler.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<bool> DeleteToken()
+    {
+        var returnResult = true;
+
+        try
+        {
+            // Kullanıcıya ait önceden oluşturulmuş bir token var mı kontrol edilir.
+            if (Context.ApplicationUserToken.Any(x => x.UserId == User.Id))
+            {
+                var userTokens = Context.ApplicationUserToken.FirstOrDefault(x => x.UserId == User.Id)!;
+
+                Context.ApplicationUserToken.Remove(userTokens);
+            }
+
+            await Context.SaveChangesAsync();
+        }
+        catch (Exception)
+        {
+            returnResult = false;
+        }
+
+        return returnResult;
     }
 }

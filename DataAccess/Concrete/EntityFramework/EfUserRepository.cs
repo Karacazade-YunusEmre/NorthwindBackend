@@ -1,5 +1,3 @@
-using Core.Utilities.Results.Abstract;
-using Core.Utilities.Results.Concrete;
 using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework.Contexts;
 using DataAccess.Library;
@@ -28,94 +26,75 @@ public class EfUserRepository : IUserRepository
         _context = context;
     }
 
-    public async Task<IResult> Register(RegisterViewModel model)
+    public async Task<bool> Register(RegisterViewModel model)
     {
-        try
+        // Kulllanıcı bulunur.
+        var existsUser = await _userManager.FindByEmailAsync(model.Email);
+
+        // Kullanıcı yoksa;
+        if (existsUser != null)
         {
-            // Kulllanıcı bulunur.
-            var existsUser = await _userManager.FindByEmailAsync(model.Email);
+            return false;
+        }
 
-            // Kullanıcı yoksa;
-            if (existsUser != null)
-            {
-                return new ErrorResult(message: "Kullanıcı zaten mevcut!");
-            }
+        var newUser = new User()
+        {
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            Email = model.Email.Trim(),
+            UserName = model.Email.Trim()
+        };
 
-            var newUser = new User()
+        // Kullanıcı oluşturulur.
+        var result = await _userManager.CreateAsync(newUser, model.Password.Trim());
+
+        // Kullanıcı oluşturulamadı ise
+        if (!result.Succeeded)
+            return false;
+
+        var roleExists = await _roleManager.RoleExistsAsync(_configuration["Roles:User"]!);
+
+        // Rol mevcut değilse
+        if (!roleExists)
+        {
+            var newRole = new IdentityRole(_configuration["Roles:User"]!)
             {
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Email = model.Email.Trim(),
-                UserName = model.Email.Trim()
+                NormalizedName = _configuration["Roles:User"],
             };
-
-            // Kullanıcı oluşturulur.
-            var result = await _userManager.CreateAsync(newUser, model.Password.Trim());
-
-            // Kullanıcı oluşturulamadı ise
-            if (!result.Succeeded)
-                return new ErrorResult(message: "Kullanıcı oluşturulma işlemi sırasında hata oluştu" +
-                                                $" {result.Errors.FirstOrDefault()?.Description}");
-
-            var roleExists = await _roleManager.RoleExistsAsync(_configuration["Roles:User"]!);
-
-            // Rol mevcut değilse
-            if (!roleExists)
-            {
-                var newRole = new IdentityRole(_configuration["Roles:User"]!)
-                {
-                    NormalizedName = _configuration["Roles:User"],
-                };
-                _roleManager.CreateAsync(newRole).Wait();
-            }
-
-            // Kullanıcıya ilgili rol ataması yapılır.
-            _userManager.AddToRoleAsync(newUser, _configuration["Roles:User"]!).Wait();
-
-            return new SuccessResult(message: "Kullanıcı başarıyla oluşturuldu");
+            _roleManager.CreateAsync(newRole).Wait();
         }
-        catch (Exception exception)
-        {
-            return new ErrorResult(message: "Kullanıcı oluşturulma işlemi sırasında" +
-                                            $"hata oluştu. {exception.Message}");
-        }
+
+        // Kullanıcıya ilgili rol ataması yapılır.
+        _userManager.AddToRoleAsync(newUser, _configuration["Roles:User"]!).Wait();
+
+        return true;
     }
 
-    public async Task<IDataResult<UserToken?>> Login(LoginViewModel model)
+    public async Task<UserToken?> Login(LoginViewModel model)
     {
-        try
-        {
-            // Mevcut kullanıcı bulunur
-            var existsUser = await _userManager.FindByEmailAsync(model.Email);
+        // Mevcut kullanıcı bulunur
+        var existsUser = await _userManager.FindByEmailAsync(model.Email);
 
-            // Eğer kullanıcı bulunamadıysa
-            if (existsUser == null)
-                return new ErrorDataResult<UserToken?>(data: null, message: "Kullanıcı bulunamadı");
+        // Eğer kullanıcı bulunamadıysa
+        if (existsUser == null)
+            return null;
 
-            var signInResult = await _signInManager.PasswordSignInAsync(
-                user: existsUser,
-                password: model.Password,
-                isPersistent: false,
-                lockoutOnFailure: false);
+        var signInResult = await _signInManager.PasswordSignInAsync(
+            user: existsUser,
+            password: model.Password,
+            isPersistent: false,
+            lockoutOnFailure: false);
 
-            // Kullanıcı giriş yapamadıysa
-            if (!signInResult.Succeeded)
-                return new ErrorDataResult<UserToken?>(data: null, message: "Kullanıcı bilgileri yanlış");
+        // Kullanıcı giriş yapamadıysa
+        if (!signInResult.Succeeded)
+            return null;
 
-            var signedUser = _context.Users.FirstOrDefault(u => u.Id == existsUser.Id);
+        var signedUser = _context.Users.FirstOrDefault(u => u.Id == existsUser.Id);
 
-            var accessTokenGenerator = new AccessTokenGenerator(_context, _configuration, signedUser!);
-            // Token oluşturulur
-            var userToken = accessTokenGenerator.GetToken();
+        var accessTokenGenerator = new AccessTokenGenerator(_context, _configuration, signedUser!);
+        // Token oluşturulur
+        var userToken = accessTokenGenerator.GetToken();
 
-            return new SuccessDataResult<UserToken?>(data: userToken, message: "Kullanıcı başarıyla " +
-                                                                               "giriş yaptı");
-        }
-        catch (Exception exception)
-        {
-            return new ErrorDataResult<UserToken?>(data: null, message: "Kullanıcı giriş işlemi " +
-                                                                        "sırasında hata oluştu!" +
-                                                                        $" {exception.Message}");
-        }
+        return userToken;
     }
 }

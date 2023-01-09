@@ -6,6 +6,6 @@ namespace DataAccess.Abstract;
 
 public interface IUserRepository
 {
-    public Task<IResult> Register(RegisterViewModel model);
-    public Task<IDataResult<UserToken?>> Login(LoginViewModel model);
+    public Task<bool> Register(RegisterViewModel model);
+    public Task<UserToken?> Login(LoginViewModel model);
 }

@@ -4,3 +4,5 @@
 4- Microsoft.EntityFrameworkCore
 5- Microsoft.EntityFrameworkCore.Sqlite
 6- Microsoft.EntityFrameworkCore.Tools
+7- Microsoft.AspNetCore.Authentication.JwtBearer
+8- Microsoft.AspNetCore.Mvc.NewtonsoftJson

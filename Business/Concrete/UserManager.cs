@@ -1,5 +1,6 @@
 using Business.Abstract;
 using Core.Utilities.Results.Abstract;
+using Core.Utilities.Results.Concrete;
 using DataAccess.Abstract;
 using Entities.Concrete.Authentication;
 using Entities.Concrete.ViewModel;
@@ -15,13 +16,39 @@ public class UserManager : IUserService
         _repository = repository;
     }
 
-    public Task<IResult> Register(RegisterViewModel model)
+    public async Task<IResult> Register(RegisterViewModel model)
     {
-        return _repository.Register(model);
+        try
+        {
+            var result = await _repository.Register(model);
+            if (result)
+                return new SuccessResult("Kullanıcı başarıyla oluşturuldu");
+
+            return new ErrorResult("Kullanıcı oluşturulamadı");
+        }
+        catch (Exception exception)
+        {
+            return new ErrorResult("Kullanıcı oluşturma işlemi sırasında hata oluştu" +
+                                   $" {exception.Message}");
+        }
     }
 
-    public Task<IDataResult<UserToken?>> Login(LoginViewModel model)
+    public async Task<IDataResult<UserToken?>> Login(LoginViewModel model)
     {
-        return _repository.Login(model);
+        try
+        {
+            var result = await _repository.Login(model);
+
+            if (result == null)
+                return new ErrorDataResult<UserToken?>(message: "Kullanıcı giriş işlemi başarısız oldu!", data: null);
+
+            return new SuccessDataResult<UserToken?>(message: "Kullanıcı giriş işlemi başarılı.", data: result);
+        }
+        catch (Exception exception)
+        {
+            return new ErrorDataResult<UserToken?>(data: null, message: "Kullanıcı giriş işlemi sırasında" +
+                                                                        " hata oluştu." +
+                                                                        $" {exception.Message}");
+        }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers;
 
+[ApiController]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _user;
@@ -15,7 +16,7 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Route("register")]
-    public async Task<IActionResult> Register(RegisterViewModel model)
+    public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
     {
         var result = await _user.Register(model);
 
@@ -31,12 +32,12 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Route("login")]
-    public async Task<IActionResult> Login(LoginViewModel model)
+    public async Task<IActionResult> Login([FromBody] LoginViewModel model)
     {
         var result = await _user.Login(model);
         if (result.Success)
         {
-            return Ok(result.Data!.Value);
+            return Ok(result.Data!);
         }
 
         return Unauthorized(result.Message);
