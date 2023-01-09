@@ -24,7 +24,6 @@ builder.Services.AddSwaggerGen();
 // builder.Services.AddScoped<ICategoryRepository, EfCategoryRepository>();
 // builder.Services.AddScoped<IProductService, ProductManager>();
 // builder.Services.AddScoped<ICategoryService, CategoryManager>();
-builder.Services.AddScoped<NorthwindContext, NorthwindContext>();
 
 
 // DependencyInjection Autofac Style
@@ -50,7 +49,9 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
 // Rol bazlı attribute'lar çalışması için gerekli
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole>(
+        options => options.User.RequireUniqueEmail = true
+        )
     .AddRoleManager<RoleManager<IdentityRole>>()
     .AddEntityFrameworkStores<NorthwindContext>().AddDefaultTokenProviders();
 

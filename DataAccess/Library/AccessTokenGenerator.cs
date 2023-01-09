@@ -4,9 +4,10 @@ using System.Text;
 using DataAccess.Concrete.EntityFramework.Contexts;
 using Entities.Concrete;
 using Entities.Concrete.Authentication;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace WebApi.Library;
+namespace DataAccess.Library;
 
 public class AccessTokenGenerator
 {
