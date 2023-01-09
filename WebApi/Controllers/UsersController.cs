@@ -1,5 +1,5 @@
 using Business.Abstract;
-using Entities.Concrete.ViewModel;
+using Core.Entities.Concrete.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers;
@@ -16,7 +16,7 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Route("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
+    public async Task<IActionResult> Register([FromBody] RegisterDto model)
     {
         var result = await _user.Register(model);
 
@@ -32,7 +32,7 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Route("login")]
-    public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+    public async Task<IActionResult> Login([FromBody] LoginDto model)
     {
         var result = await _user.Login(model);
         if (result.Success)

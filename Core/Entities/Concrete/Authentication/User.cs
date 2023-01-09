@@ -1,11 +1,11 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Core.Entities;
+using Core.Entities.Abstract;
 using Microsoft.AspNetCore.Identity;
 
-namespace Entities.Concrete.Authentication;
+namespace Core.Entities.Concrete.Authentication;
 
-public class User : IdentityUser, IEntity
+public class User : IdentityUser, IAuthenticationEntity
 {
     [Required(ErrorMessage = "Ad alanı boş bırakılamaz")]
     [DisplayName("Ad")]

@@ -1,9 +1,10 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Core.Entities.Abstract;
 
-namespace Entities.Concrete.ViewModel;
+namespace Core.Entities.Concrete.Dtos;
 
-public class RegisterViewModel
+public class RegisterDto : IDto
 {
     [Required]
     [DisplayName("Ad")]

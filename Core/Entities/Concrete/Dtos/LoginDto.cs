@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Core.Entities.Abstract;
 
-namespace Entities.Concrete.ViewModel;
+namespace Core.Entities.Concrete.Dtos;
 
-public class LoginViewModel
+public class LoginDto : IDto
 {
     [Required(ErrorMessage = "Email adresi zorunlu")]
     [EmailAddress]

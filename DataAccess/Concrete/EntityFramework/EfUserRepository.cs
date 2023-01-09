@@ -1,8 +1,8 @@
+using Core.Entities.Concrete.Authentication;
+using Core.Entities.Concrete.Dtos;
 using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework.Contexts;
 using DataAccess.Library;
-using Entities.Concrete.Authentication;
-using Entities.Concrete.ViewModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
@@ -26,7 +26,7 @@ public class EfUserRepository : IUserRepository
         _context = context;
     }
 
-    public async Task<bool> Register(RegisterViewModel model)
+    public async Task<bool> Register(RegisterDto model)
     {
         // Kulllanıcı bulunur.
         var existsUser = await _userManager.FindByEmailAsync(model.Email);
@@ -70,7 +70,7 @@ public class EfUserRepository : IUserRepository
         return true;
     }
 
-    public async Task<UserToken?> Login(LoginViewModel model)
+    public async Task<UserToken?> Login(LoginDto model)
     {
         // Mevcut kullanıcı bulunur
         var existsUser = await _userManager.FindByEmailAsync(model.Email);

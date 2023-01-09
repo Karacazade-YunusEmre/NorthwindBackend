@@ -1,11 +1,10 @@
-using Core.Utilities.Results.Abstract;
-using Entities.Concrete.Authentication;
-using Entities.Concrete.ViewModel;
+using Core.Entities.Concrete.Authentication;
+using Core.Entities.Concrete.Dtos;
 
 namespace DataAccess.Abstract;
 
 public interface IUserRepository
 {
-    public Task<bool> Register(RegisterViewModel model);
-    public Task<UserToken?> Login(LoginViewModel model);
+    public Task<bool> Register(RegisterDto model);
+    public Task<UserToken?> Login(LoginDto model);
 }

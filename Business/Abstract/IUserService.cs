@@ -1,11 +1,11 @@
+using Core.Entities.Concrete.Authentication;
+using Core.Entities.Concrete.Dtos;
 using Core.Utilities.Results.Abstract;
-using Entities.Concrete.Authentication;
-using Entities.Concrete.ViewModel;
 
 namespace Business.Abstract;
 
 public interface IUserService
 {
-    public Task<IResult> Register(RegisterViewModel model);
-    public Task<IDataResult<UserToken?>> Login(LoginViewModel model);
+    public Task<IResult> Register(RegisterDto model);
+    public Task<IDataResult<UserToken?>> Login(LoginDto model);
 }

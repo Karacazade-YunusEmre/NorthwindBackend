@@ -1,9 +1,9 @@
 using Business.Abstract;
+using Core.Entities.Concrete.Authentication;
+using Core.Entities.Concrete.Dtos;
 using Core.Utilities.Results.Abstract;
 using Core.Utilities.Results.Concrete;
 using DataAccess.Abstract;
-using Entities.Concrete.Authentication;
-using Entities.Concrete.ViewModel;
 
 namespace Business.Concrete;
 
@@ -16,7 +16,7 @@ public class UserManager : IUserService
         _repository = repository;
     }
 
-    public async Task<IResult> Register(RegisterViewModel model)
+    public async Task<IResult> Register(RegisterDto model)
     {
         try
         {
@@ -33,7 +33,7 @@ public class UserManager : IUserService
         }
     }
 
-    public async Task<IDataResult<UserToken?>> Login(LoginViewModel model)
+    public async Task<IDataResult<UserToken?>> Login(LoginDto model)
     {
         try
         {

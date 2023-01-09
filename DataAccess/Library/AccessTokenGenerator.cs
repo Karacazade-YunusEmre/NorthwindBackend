@@ -1,8 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Core.Entities.Concrete.Authentication;
 using DataAccess.Concrete.EntityFramework.Contexts;
-using Entities.Concrete.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
