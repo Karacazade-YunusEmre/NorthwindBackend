@@ -51,4 +51,21 @@ public class UserManager : IUserService
                                                                         $" {exception.Message}");
         }
     }
+
+    public async Task<IResult> Logout(LogoutDto model)
+    {
+        try
+        {
+            var result = await _repository.Logout(model);
+
+            if (result)
+                return new SuccessResult(message: "Çıkış işlemi başarılı");
+
+            return new ErrorResult(message: "Çıkış işlemi gerçekleştirilemedi");
+        }
+        catch (Exception exception)
+        {
+            return new ErrorResult($"Çıkış işlemi sırasında hata oluştu. {exception.Message}");
+        }
+    }
 }

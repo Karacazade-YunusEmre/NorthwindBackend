@@ -42,4 +42,17 @@ public class UsersController : ControllerBase
 
         return Unauthorized(result.Message);
     }
+
+    [HttpPost]
+    [Route("logout")]
+    public async Task<IActionResult> Logout([FromBody] LogoutDto model)
+    {
+        var result = await _user.Logout(model);
+        if (result.Success)
+        {
+            return Ok(result.Message);
+        }
+
+        return BadRequest(result.Message);
+    }
 }

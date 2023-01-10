@@ -8,4 +8,5 @@ public interface IUserService
 {
     public Task<IResult> Register(RegisterDto model);
     public Task<IDataResult<UserToken?>> Login(LoginDto model);
+    public Task<IResult> Logout(LogoutDto model);
 }

@@ -101,4 +101,17 @@ public class EfUserRepository : IUserRepository
 
         return userToken;
     }
+
+    public async Task<bool> Logout(LogoutDto model)
+    {
+        // Mevcut kullanıcı bulunur
+        var existsUser = await _userManager.FindByEmailAsync(model.Email);
+
+        // Eğer kullanıcı bulunamadıysa
+        if (existsUser == null)
+            return false;
+
+        await _signInManager.SignOutAsync();
+        return true;
+    }
 }

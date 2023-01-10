@@ -7,4 +7,5 @@ public interface IUserRepository
 {
     public Task<bool> Register(RegisterDto model);
     public Task<UserToken?> Login(LoginDto model);
+    public Task<bool> Logout(LogoutDto model);
 }
