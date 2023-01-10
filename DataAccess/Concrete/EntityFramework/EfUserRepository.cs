@@ -45,7 +45,7 @@ public class EfUserRepository : IUserRepository
             FirstName = model.FirstName,
             LastName = model.LastName,
             Email = model.Email.Trim(),
-            UserName = model.Email.Trim()
+            UserName = model.Email.Trim(),
         };
 
         // Kullanıcı oluşturulur.
