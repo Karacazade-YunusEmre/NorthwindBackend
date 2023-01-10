@@ -43,18 +43,25 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 var secretStr = builder.Configuration["Application:Secret"];
 var secret = Encoding.UTF8.GetBytes(secretStr ?? "CustomSecretKey131780.");
 
+// Cors bir güvenlik önlemidir
+// Bu yapıyla dışarıdan yani 3000 portundan istek gelirse
+// cevap ver demiş olduk
+builder.Services.AddCors(options => options.AddPolicy(
+    name: "AllowOrigin",
+    policyBuilder => policyBuilder.WithOrigins("http://localhost:3000"))
+);
 
-builder.Services.AddCors();
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
 // Rol bazlı attribute'lar çalışması için gerekli
 builder.Services.AddIdentity<User, IdentityRole>(
         options => options.User.RequireUniqueEmail = true
-        )
+    )
     .AddRoleManager<RoleManager<IdentityRole>>()
     .AddEntityFrameworkStores<NorthwindContext>().AddDefaultTokenProviders();
 
+// JwtBearer için authentication tanımlamaları
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -70,7 +77,8 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(secret),
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidateIssuer = false,
+        // ValidateIssuer = false,
+        ValidateIssuer = true,
         ValidateAudience = true,
         ClockSkew = TimeSpan.Zero
     };
@@ -122,19 +130,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "JwtTokenWithIdentity v1"));
 }
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.UseHttpsRedirection();
-
 // **************************************************************
 
-app.UseCors(x => x
+app.UseCors(corsPolicyBuilder => corsPolicyBuilder
     .SetIsOriginAllowed(_ => true)
     .AllowAnyOrigin()
     .AllowAnyMethod()
-    .AllowAnyHeader());
+    .AllowAnyHeader()
+    .WithOrigins("http://localhost:3000").AllowAnyHeader()
+);
 
 app.UseAuthentication();
 app.UseRouting();
@@ -142,6 +146,9 @@ app.UseAuthorization();
 
 // **************************************************************
 
+app.UseHttpsRedirection();
+
+app.UseHttpsRedirection();
 
 app.MapControllers();
 
