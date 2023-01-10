@@ -1,8 +1,7 @@
-using Core.Entities;
 using Core.Entities.Abstract;
 using Core.Utilities.Results.Abstract;
 
-namespace Core.Business;
+namespace Core.Business.Abstract;
 
 public interface IService<TEntity> where TEntity : class, IEntity, new()
 {

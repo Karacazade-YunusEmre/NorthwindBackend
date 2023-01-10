@@ -1,6 +1,8 @@
 using Autofac;
 using Business.Abstract;
 using Business.Concrete;
+using Core.Library.Abstract;
+using Core.Library.Concrete;
 using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework;
 using DataAccess.Concrete.EntityFramework.Contexts;
@@ -18,5 +20,6 @@ public class AutofacBusinessModule : Module
         builder.RegisterType<NorthwindContext>().As<NorthwindContext>();
         builder.RegisterType<EfUserRepository>().As<IUserRepository>();
         builder.RegisterType<UserManager>().As<IUserService>();
+        builder.RegisterType<TokenGenerator>().As<ITokenGenerator>();
     }
 }

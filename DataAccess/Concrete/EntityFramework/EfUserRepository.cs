@@ -1,8 +1,8 @@
 using Core.Entities.Concrete.Authentication;
 using Core.Entities.Concrete.Dtos;
+using Core.Library.Abstract;
 using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework.Contexts;
-using DataAccess.Library;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
@@ -15,15 +15,18 @@ public class EfUserRepository : IUserRepository
     private readonly SignInManager<User> _signInManager;
     private readonly UserManager<User> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly ITokenGenerator _tokenGenerator;
 
     public EfUserRepository(RoleManager<IdentityRole> roleManager, UserManager<User> userManager,
-        SignInManager<User> signInManager, IConfiguration configuration, NorthwindContext context)
+        SignInManager<User> signInManager, IConfiguration configuration, NorthwindContext context,
+        ITokenGenerator tokenGenerator)
     {
         _roleManager = roleManager;
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
         _context = context;
+        _tokenGenerator = tokenGenerator;
     }
 
     public async Task<bool> Register(RegisterDto model)
@@ -91,9 +94,10 @@ public class EfUserRepository : IUserRepository
 
         var signedUser = _context.Users.FirstOrDefault(u => u.Id == existsUser.Id);
 
-        var accessTokenGenerator = new AccessTokenGenerator(_context, _configuration, signedUser!);
+        if (signedUser == null) return null;
+
         // Token oluşturulur
-        var userToken = accessTokenGenerator.GetToken();
+        var userToken = await _tokenGenerator.GetToken<NorthwindContext>(signedUser);
 
         return userToken;
     }
