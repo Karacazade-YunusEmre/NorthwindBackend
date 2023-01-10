@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Core.Entities.Concrete.Authentication;
+using Core.Extensions;
 using Core.Library.Abstract;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -112,20 +113,16 @@ public class TokenGenerator : ITokenGenerator
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_configuration["Application:Secret"]!);
 
+        var claims = new List<Claim>();
+        claims.AddName($"{user.FirstName} {user.LastName}");
+        claims.AddEmail(user.Email);
+        claims.AddIdentifier(user.Id);
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Audience = _configuration["Application:Audience"],
             Issuer = _configuration["Application:Issuer"],
-            Subject = new ClaimsIdentity(new[]
-            {
-                // Claim tanımları yapılır.
-                // Burada en önemlisi Id ve emaildir.
-                // Id üzerinden, aktif kullanıcıyı buluyor olacağız.
-
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
-                new Claim(ClaimTypes.Email, user.Email)
-            }),
+            Subject = new ClaimsIdentity(claims),
 
             // ExpireDate
             Expires = expireDate,
