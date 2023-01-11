@@ -71,11 +71,16 @@ builder.Services.AddAuthentication(options =>
     options.RequireHttpsMetadata = false;
     options.TokenValidationParameters = new TokenValidationParameters()
     {
-        IssuerSigningKey = new SymmetricSecurityKey(secret),
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidateIssuer = false,
+        ValidateIssuer = true,
         ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidIssuer = builder.Configuration["Application:Issuer"],
+        ValidAudience = builder.Configuration["Application:Audience"],
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(secret),
+
+        // Token expiration zamanını saniye cinsinden vermek 
+        // istenirse bu ClockSkew değerinin Zero yapılması gerekir
         // ClockSkew = TimeSpan.Zero
     };
 });
