@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +24,6 @@ builder.Services.AddSwaggerGen();
 // builder.Services.AddScoped<IProductService, ProductManager>();
 // builder.Services.AddScoped<ICategoryService, CategoryManager>();
 
-
 // DependencyInjection Autofac Style
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
     .ConfigureContainer<ContainerBuilder>(containerBuilder =>
@@ -40,9 +38,6 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 // builder.Services.AddDbContext<NorthwindContext>(options =>
 //     options.UseSqlite(connectionString));
 
-var secretStr = builder.Configuration["Application:Secret"];
-var secret = Encoding.UTF8.GetBytes(secretStr ?? "CustomSecretKey131780.");
-
 // Cors bir güvenlik önlemidir
 // Bu yapıyla dışarıdan yani 3000 portundan istek gelirse
 // cevap ver demiş olduk
@@ -51,15 +46,17 @@ builder.Services.AddCors(options => options.AddPolicy(
     policyBuilder => policyBuilder.WithOrigins("http://localhost:3000"))
 );
 
-builder.Services.AddControllers().AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
-
 // Rol bazlı attribute'lar çalışması için gerekli
 builder.Services.AddIdentity<User, IdentityRole>(
         options => options.User.RequireUniqueEmail = true
     )
     .AddRoleManager<RoleManager<IdentityRole>>()
     .AddEntityFrameworkStores<NorthwindContext>().AddDefaultTokenProviders();
+
+// SecretKey Configuration dosyasında tanımladığımız Secret değeridir
+// Bu değer ile Jwt token oluşturulduğu için oldukça önemlidir
+var secretStr = builder.Configuration["Application:Secret"];
+var secret = Encoding.UTF8.GetBytes(secretStr!);
 
 // JwtBearer için authentication tanımlamaları
 builder.Services.AddAuthentication(options =>
@@ -77,12 +74,12 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(secret),
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        // ValidateIssuer = false,
-        ValidateIssuer = true,
+        ValidateIssuer = false,
         ValidateAudience = true,
-        ClockSkew = TimeSpan.Zero
+        // ClockSkew = TimeSpan.Zero
     };
 });
+
 
 // SwaggerUI ile Authorization işlemleri için gerekli
 builder.Services.AddSwaggerGen(c =>
@@ -132,6 +129,10 @@ if (app.Environment.IsDevelopment())
 
 // **************************************************************
 
+app.UseAuthentication();
+app.UseRouting();
+app.UseAuthorization();
+
 app.UseCors(corsPolicyBuilder => corsPolicyBuilder
     .SetIsOriginAllowed(_ => true)
     .AllowAnyOrigin()
@@ -140,9 +141,6 @@ app.UseCors(corsPolicyBuilder => corsPolicyBuilder
     .WithOrigins("http://localhost:3000").AllowAnyHeader()
 );
 
-app.UseAuthentication();
-app.UseRouting();
-app.UseAuthorization();
 
 // **************************************************************
 

@@ -34,7 +34,7 @@ public class EfUserRepository : IUserRepository
         // Kulllanıcı bulunur.
         var existsUser = await _userManager.FindByEmailAsync(model.Email);
 
-        // Kullanıcı yoksa;
+        // Kullanıcı kayıtlıysa;
         if (existsUser != null)
         {
             return false;

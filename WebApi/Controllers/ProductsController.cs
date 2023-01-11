@@ -1,11 +1,13 @@
 using Business.Abstract;
 using Entities.Concrete;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize()]
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _product;
@@ -83,6 +85,7 @@ public class ProductsController : ControllerBase
 
     [HttpPost]
     [Route("add")]
+    [Authorize(Roles = "User, Manager, Admin")]
     public IActionResult AddProduct(Product product)
     {
         try
@@ -103,6 +106,7 @@ public class ProductsController : ControllerBase
         return BadRequest();
     }
 
+    [Authorize(Roles = "Manager, Admin")]
     [HttpPut]
     [Route("update")]
     public IActionResult UpdateProduct(Product product)
@@ -125,6 +129,7 @@ public class ProductsController : ControllerBase
         return BadRequest();
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete]
     [Route("delete")]
     public IActionResult DeleteProduct(int id)
