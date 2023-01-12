@@ -21,10 +21,7 @@ public class UserManager : IUserService
         try
         {
             var result = await _repository.Register(model);
-            if (result)
-                return new SuccessResult("Kullanıcı başarıyla oluşturuldu");
-
-            return new ErrorResult("Kullanıcı oluşturulamadı");
+            return result;
         }
         catch (Exception exception)
         {
@@ -39,10 +36,7 @@ public class UserManager : IUserService
         {
             var result = await _repository.Login(model);
 
-            if (result == null)
-                return new ErrorDataResult<UserToken?>(message: "Kullanıcı giriş işlemi başarısız oldu!", data: null);
-
-            return new SuccessDataResult<UserToken?>(message: "Kullanıcı giriş işlemi başarılı.", data: result);
+            return result;
         }
         catch (Exception exception)
         {
@@ -58,10 +52,7 @@ public class UserManager : IUserService
         {
             var result = await _repository.Logout(model);
 
-            if (result)
-                return new SuccessResult(message: "Çıkış işlemi başarılı");
-
-            return new ErrorResult(message: "Çıkış işlemi gerçekleştirilemedi");
+            return result;
         }
         catch (Exception exception)
         {

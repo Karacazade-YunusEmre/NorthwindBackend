@@ -1,6 +1,8 @@
 using Core.Entities.Concrete.Authentication;
 using Core.Entities.Concrete.Dtos;
 using Core.Library.Abstract;
+using Core.Utilities.Results.Abstract;
+using Core.Utilities.Results.Concrete;
 using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework.Contexts;
 using Microsoft.AspNetCore.Identity;
@@ -29,7 +31,7 @@ public class EfUserRepository : IUserRepository
         _tokenGenerator = tokenGenerator;
     }
 
-    public async Task<bool> Register(RegisterDto model)
+    public async Task<IResult> Register(RegisterDto model)
     {
         // Kulllanıcı bulunur.
         var existsUser = await _userManager.FindByEmailAsync(model.Email);
@@ -37,7 +39,7 @@ public class EfUserRepository : IUserRepository
         // Kullanıcı kayıtlıysa;
         if (existsUser != null)
         {
-            return false;
+            return new ErrorResult(message: "Kullanıcı zaten mevcut");
         }
 
         var newUser = new User()
@@ -53,7 +55,7 @@ public class EfUserRepository : IUserRepository
 
         // Kullanıcı oluşturulamadı ise
         if (!result.Succeeded)
-            return false;
+            return new ErrorResult(message: $"Kullanıcı oluşturulamadı. {result}");
 
         var roleExists = await _roleManager.RoleExistsAsync(_configuration["Roles:User"]!);
 
@@ -70,17 +72,17 @@ public class EfUserRepository : IUserRepository
         // Kullanıcıya ilgili rol ataması yapılır.
         _userManager.AddToRoleAsync(newUser, _configuration["Roles:User"]!).Wait();
 
-        return true;
+        return new SuccessResult("Kullanıcı başarıyla oluşturuldu");
     }
 
-    public async Task<UserToken?> Login(LoginDto model)
+    public async Task<IDataResult<UserToken?>> Login(LoginDto model)
     {
         // Mevcut kullanıcı bulunur
         var existsUser = await _userManager.FindByEmailAsync(model.Email);
 
         // Eğer kullanıcı bulunamadıysa
         if (existsUser == null)
-            return null;
+            return new ErrorDataResult<UserToken?>(message: "Kullanıcı bulunamadı", data: null);
 
         var signInResult = await _signInManager.PasswordSignInAsync(
             user: existsUser,
@@ -90,28 +92,32 @@ public class EfUserRepository : IUserRepository
 
         // Kullanıcı giriş yapamadıysa
         if (!signInResult.Succeeded)
-            return null;
+            return new ErrorDataResult<UserToken?>(message: "Kullanıcı giriş işlemi başarısız. " +
+                                                            $"{signInResult}", data: null);
 
         var signedUser = _context.Users.FirstOrDefault(u => u.Id == existsUser.Id);
 
-        if (signedUser == null) return null;
+        if (signedUser == null)
+            return new ErrorDataResult<UserToken?>(message: "Kullanıcı giriş işlemi başarısız. " +
+                                                            $"{signedUser}", data: null);
 
         // Token oluşturulur
         var userToken = await _tokenGenerator.GetToken<NorthwindContext>(signedUser);
 
-        return userToken;
+        return new SuccessDataResult<UserToken?>(message: "Kullanıcı giriş işlemi başarılı",
+            data: userToken);
     }
 
-    public async Task<bool> Logout(LogoutDto model)
+    public async Task<IResult> Logout(LogoutDto model)
     {
         // Mevcut kullanıcı bulunur
         var existsUser = await _userManager.FindByEmailAsync(model.Email);
 
         // Eğer kullanıcı bulunamadıysa
         if (existsUser == null)
-            return false;
+            return new ErrorResult(message: "Kullanıcı bulunamadı!");
 
         await _signInManager.SignOutAsync();
-        return true;
+        return new SuccessResult(message: "Çıkış işlemi başarılı");
     }
 }
